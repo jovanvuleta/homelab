@@ -1,0 +1,8 @@
+# Generated Talos machine configs — embed cluster PKI private keys, never commit.
+talos/generated/
+
+# Plaintext Tailscale operator OAuth secret; only the .sops.yaml copy is committed.
+talos/tailscale-operator-secret.yaml
+
+.DS_Store
+.idea/

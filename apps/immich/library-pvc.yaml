@@ -1,0 +1,36 @@
+# Photo library lives on the external USB drive (Volume 1, ext4, label
+# immich-data) attached to the Proxmox host pve1 and shared over NFS.
+# Static PV: no provisioner involved, Kubernetes just mounts the NFS export.
+# The size is a label only; the real limit is the drive (~531G).
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-library
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  mountOptions:
+    - nfsvers=4.2
+    - hard
+  nfs:
+    server: 192.168.1.50 # pve1
+    path: /mnt/immich-data/immich
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: immich-library
+  namespace: immich
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: immich-library
+  resources:
+    requests:
+      storage: 500Gi

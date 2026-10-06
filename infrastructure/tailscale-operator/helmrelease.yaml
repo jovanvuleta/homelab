@@ -1,0 +1,22 @@
+# Overrides only — chart defaults documented in full in values.yaml (not
+# applied directly; Helm already merges these over the chart's own defaults).
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tailscale-operator
+  namespace: tailscale
+spec:
+  interval: 1h
+  releaseName: tailscale-operator
+  chart:
+    spec:
+      chart: tailscale-operator
+      version: "1.102.4"
+      sourceRef:
+        kind: HelmRepository
+        name: tailscale
+        namespace: tailscale
+  values:
+    apiServerProxyConfig:
+      mode: "true" # ours: default "false", enabled so Ingress resources with ingressClassName tailscale get proxied

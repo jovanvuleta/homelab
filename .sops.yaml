@@ -1,0 +1,16 @@
+# Recipients that can decrypt each class of secret.
+# The (\.sops)? group is optional on purpose: SOPS matches the INPUT filename,
+# so these rules match both talsecret.yaml (plaintext, pre-encrypt) and
+# talsecret.sops.yaml (encrypted, committed).
+creation_rules:
+  # Talos cluster PKI - irreplaceable, rebuilds the cluster identity.
+  # Two recipients: age for daily use, PGP as the independent recovery key.
+  # Either one alone can decrypt.
+  - path_regex: talos/talsecret(\.sops)?\.yaml$
+    age: age1lpesjq3srcaw2hy5kymumr833eere02y8qqrpnne4wphcaklkdaqwujk7l
+    pgp: 412E958B884EF1D42A7AD3D4245301B551E25D5E
+
+  # Kubernetes application + infrastructure secrets - rotatable
+  - path_regex: (infrastructure|apps)/.*(\.sops)?\.yaml$
+    age: age1lpesjq3srcaw2hy5kymumr833eere02y8qqrpnne4wphcaklkdaqwujk7l
+    pgp: 412E958B884EF1D42A7AD3D4245301B551E25D5E

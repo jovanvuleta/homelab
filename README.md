@@ -15,6 +15,7 @@ Everything the cluster runs is declared in this repository. Secrets are committe
 
 **Apps**
 - **[Immich](https://immich.app/)**: self-hosted photo and video library, replacing cloud photo storage.
+- **[Home Assistant](https://www.home-assistant.io/)**: home automation, running as its own VM on Proxmox.
 
 **Planned**
 - Observability: Prometheus, Grafana and alerting.
@@ -24,6 +25,7 @@ Everything the cluster runs is declared in this repository. Secrets are committe
 ## Layout
 
 ```
+proxmox/          Proxmox VMs (Home Assistant, Talos nodes), managed with OpenTofu
 talos/            Talos cluster secrets (SOPS-encrypted)
 infrastructure/   cluster-wide components: storage, operators, networking
 apps/             self-hosted applications

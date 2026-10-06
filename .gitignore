@@ -6,3 +6,8 @@ talos/tailscale-operator-secret.yaml
 
 .DS_Store
 .idea/
+
+# OpenTofu: provider cache and local state (state is not for a public repo)
+proxmox/.terraform/
+proxmox/tfplan
+proxmox/terraform.tfstate*

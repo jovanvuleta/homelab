@@ -48,6 +48,8 @@ spec:
       persistence:
         library:
           existingClaim: immich-library # ours: created in library-pvc.yaml
+      metrics:
+        enabled: true # ours: Prometheus scrapes Immich via ServiceMonitors
     valkey:
       enabled: true # ours: default false, we use the chart's bundled Valkey (Redis fork) instead of an external one
     server:

@@ -7,3 +7,4 @@ resources:
   - library-pvc.yaml
   - helmrepository.yaml
   - helmrelease.yaml
+  - podmonitor.yaml

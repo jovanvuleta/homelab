@@ -30,7 +30,6 @@ spec:
       enabled: false
     kubeProxy:
       enabled: false
-
     prometheus:
       prometheusSpec:
         retention: 10d
@@ -50,7 +49,6 @@ spec:
               resources:
                 requests:
                   storage: 15Gi
-
     alertmanager:
       alertmanagerSpec:
         # Mounted at /etc/alertmanager/secrets/alertmanager-telegram/
@@ -106,7 +104,6 @@ spec:
                 chat_id: 1578466488
                 parse_mode: HTML
                 send_resolved: true
-
     grafana:
       admin:
         existingSecret: grafana-admin
@@ -120,3 +117,31 @@ spec:
         tls:
           - hosts:
               - grafana # MagicDNS name: grafana.<tailnet>.ts.net
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+            - name: homelab
+              orgId: 1
+              folder: Homelab
+              type: file
+              disableDeletion: true
+              editable: false
+              options:
+                path: /var/lib/grafana/dashboards/homelab
+      dashboards:
+        homelab:
+          cloudnative-pg:
+            gnetId: 20417
+            revision: 4
+            datasource:
+              - name: DS_PROMETHEUS
+                value: Prometheus
+              - name: DS_EXPRESSION
+                value: __expr__
+          immich:
+            gnetId: 22555
+            revision: 1
+            datasource:
+              - name: DS_PROMETHEUS
+                value: Prometheus

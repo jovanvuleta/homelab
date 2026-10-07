@@ -105,6 +105,12 @@ spec:
                 parse_mode: HTML
                 send_resolved: true
     grafana:
+      additionalDataSources:
+        - name: Loki
+          type: loki
+          uid: loki
+          access: proxy
+          url: http://loki.monitoring.svc.cluster.local:3100
       # GF_AUTH_GITHUB_CLIENT_ID / _SECRET; Grafana reads GF_* env over grafana.ini.
       envFromSecret: grafana-github-oauth
       grafana.ini:
@@ -162,3 +168,5 @@ spec:
             datasource:
               - name: DS_PROMETHEUS
                 value: Prometheus
+              - name: DS_LOKI
+                value: Loki

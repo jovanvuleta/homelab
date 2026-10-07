@@ -8,28 +8,44 @@ Everything the cluster runs is declared in this repository. Secrets are committe
 
 **Platform**
 - **Talos Linux**: immutable, API-managed Kubernetes OS running as VMs on Proxmox.
-- **Flux**: GitOps. The cluster reconciles itself from this repository.
+- **Flux** (via the Flux Operator): GitOps. The cluster reconciles itself from this repository.
 - **Tailscale operator**: private access to services over the tailnet, with HTTPS and no ports open to the internet.
 - **CloudNativePG**: PostgreSQL operator for app databases.
 - **local-path-provisioner**: node-local storage, plus NFS for bulk media.
 
+**Observability**
+- **kube-prometheus-stack**: Prometheus, Grafana (GitHub sign-in) and Alertmanager.
+- Alerts go to **Telegram**; a **healthchecks.io** heartbeat reports when the whole homelab is down.
+- **[Gatus](https://gatus.io/)**: uptime checks for every service, also alerting to Telegram.
+
 **Apps**
 - **[Immich](https://immich.app/)**: self-hosted photo and video library, replacing cloud photo storage.
 - **[Home Assistant](https://www.home-assistant.io/)**: home automation, running as its own VM on Proxmox.
+- **[AdGuard Home](https://adguard.com/adguard-home/overview.html)**: DNS-level ad and tracker blocking for every device on the tailnet.
+- **[Homepage](https://gethomepage.dev/)**: start page linking everything, with live status.
 
 **Planned**
-- Observability: Prometheus, Grafana and alerting.
 - Backups: off-site copies of the photo library and databases.
 - More self-hosted services over time.
 
 ## Layout
 
 ```
+clusters/homelab/ Flux entry point: the FluxInstance and what to sync, in order
+infrastructure/   cluster-wide components: storage, operators, networking, monitoring
+apps/             self-hosted applications
 proxmox/          Proxmox VMs (Home Assistant, Talos nodes), managed with OpenTofu
 talos/            Talos cluster secrets (SOPS-encrypted)
-infrastructure/   cluster-wide components: storage, operators, networking
-apps/             self-hosted applications
 ```
+
+## Development
+
+- **Updates**: [Renovate](https://docs.renovatebot.com/) opens pull requests for new chart, image, provider and action versions; merging deploys them through Flux.
+- **Checks**: [pre-commit](https://pre-commit.com/) runs linting, secret scanning (gitleaks) and [Conventional Commits](https://www.conventionalcommits.org/) message checks locally, and the same checks run in CI on every pull request. Enable them once per clone:
+
+  ```bash
+  pre-commit install --hook-type pre-commit --hook-type commit-msg
+  ```
 
 ## Secrets
 

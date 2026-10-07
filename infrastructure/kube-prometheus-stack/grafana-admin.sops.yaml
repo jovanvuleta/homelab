@@ -1,0 +1,35 @@
+apiVersion: ENC[AES256_GCM,data:2i4=,iv:QFCwjCgR6taDbIV+kWigmlG1eK0rKqNopDUJiFxiJkg=,tag:bHui2X1I1sylPmiEW2O9GA==,type:str]
+kind: ENC[AES256_GCM,data:iSuppTOW,iv:mGPDICAh2V1aK5yA32qGVsA34+Wv9T4yRwCUdIWm+VQ=,tag:qKD8lz1KteUQVuFeBq5AeA==,type:str]
+metadata:
+    name: ENC[AES256_GCM,data:w5MVPo4lPuQWLdDhSw==,iv:3hQ6pRg0eVizIAaooScUBcofdns+B6d8yqX3ncrE3/c=,tag:pLzRCl5YaXEZwJNppR40sQ==,type:str]
+    namespace: ENC[AES256_GCM,data:teBdArTRPymp1g==,iv:rkEQ/SwTHYaSfHYPhzF+OgL74n8PY8oFK8wfyKN+cuE=,tag:Z6d5jMqah3qnHY1YPlAzbQ==,type:str]
+stringData:
+    admin-user: ENC[AES256_GCM,data:Uhc3RWs=,iv:fLvFEsLXjh4Adq9QVrjz/Iwqt83MZrbpq8ZFUvcfgTA=,tag:9xy84m8tKEWT9981dwHkMA==,type:str]
+    admin-password: ENC[AES256_GCM,data:1/E0Tqq1vX6N1Ln4yC6zUle1g1unGWxuIWS8ayCy4Q==,iv:wHK529ea3b0W3tUco3kZ+dTXLQXtX28szrHQMMbBKjA=,tag:56nTPjkiU/xSTAIhDVrrdQ==,type:str]
+sops:
+    age:
+        - recipient: age1lpesjq3srcaw2hy5kymumr833eere02y8qqrpnne4wphcaklkdaqwujk7l
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB5WCtDRzZkMHJjbFAzUXl6
+            SDJaWEZKVGdudFJ4ZjNzNjI4aWVVNy82NnowCmxZaEpVd2xnRUNkTjUvZTdQUVpn
+            QzM0dWZYOTNlN1JLZGd2clV1cGVzcFUKLS0tIFYvZnFrWFpQK0FtK2E3L1VQUk1I
+            anlVTHJWSmkrS3Zrb3NXVmMvWTZYZjAKjIW4Rsm/UwwZGiFYxYDIzsXnxbudy3Dc
+            6i7NMRVL/jatUhhs62J9HOVi852EaEGqQruaKkka3xngwpJ0s0oKWA==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2026-10-07T17:53:44Z"
+    mac: ENC[AES256_GCM,data:XFsSTYi1Se3abohofbg3iZwjoOaXLTQZz+OdLMLiVgSOkxV2fOsCOLXdr0PzUjZw7kiYtOvXOLdr84ekfAnfQh0TPnKxFmDI8+nyusgQncLOup9ixTOeLEqXYxU4tKV5J2LYbzgaffNdJNhtPhddM1mSJD8bVpvzgxsEPTNGy7g=,iv:nAA0PZWw5JAUs/0By30i7KYWTDj8CYPDGlGz1w1qrRA=,tag:qieuLzCJmka7b2q8xqBJ+w==,type:str]
+    pgp:
+        - created_at: "2026-10-07T17:53:44Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hF4Dp/riva+aomESAQdAVGsw6mmzBEh1HylzV3Si6ITtMcbJHcyNMLbjBLW6/B8w
+            IB6bASJbvwwGRVm9t9RrKofmEDhk8txtC1jn+yrqzfCrGOL5oxLqCFUJVmtbNyIs
+            1FsBCQIQktwTb1nU6DWnEiSX2rUJRfCy0FeEM0/33lcKQvKxXVj4AvzmMHdlw/SY
+            1IoCRkkTYHTctTJ2zrXexRyPGrH6BTBQa7xLGQU8PIm+8ZZMeamZZ1bnAdUQ
+            =X9rw
+            -----END PGP MESSAGE-----
+          fp: 412E958B884EF1D42A7AD3D4245301B551E25D5E
+    unencrypted_suffix: _unencrypted
+    version: 3.12.2

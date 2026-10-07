@@ -1,0 +1,63 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 1h
+  releaseName: kube-prometheus-stack
+  timeout: 10m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: "92.1.0"
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+  install:
+    crds: Create
+  upgrade:
+    crds: CreateReplace
+  values:
+    # Talos binds these to localhost; scraping them needs a Talos machine
+    # config patch first, otherwise they'd show as permanently down.
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeEtcd:
+      enabled: false
+    kubeProxy:
+      enabled: false
+
+    prometheus:
+      prometheusSpec:
+        retention: 10d
+        retentionSize: 12GB
+        # Pick up ServiceMonitors/PodMonitors/rules from every namespace.
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        ruleSelectorNilUsesHelmValues: false
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: local-path
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 15Gi
+
+    grafana:
+      admin:
+        existingSecret: grafana-admin
+        userKey: admin-user
+        passwordKey: admin-password
+      defaultDashboardsTimezone: browser
+      ingress:
+        enabled: true
+        ingressClassName: tailscale
+        hosts: [] # tailscale drops rules that carry a host
+        tls:
+          - hosts:
+              - grafana # MagicDNS name: grafana.<tailnet>.ts.net

@@ -105,6 +105,23 @@ spec:
                 parse_mode: HTML
                 send_resolved: true
     grafana:
+      # GF_AUTH_GITHUB_CLIENT_ID / _SECRET; Grafana reads GF_* env over grafana.ini.
+      envFromSecret: grafana-github-oauth
+      grafana.ini:
+        server:
+          root_url: https://grafana.tail65d0f1.ts.net # OAuth callback base
+        auth.github:
+          enabled: true
+          allow_sign_up: true
+          scopes: user:email
+          auth_url: https://github.com/login/oauth/authorize
+          token_url: https://github.com/login/oauth/access_token
+          api_url: https://api.github.com/user
+          # Only this GitHub account may log in (as server admin); with strict
+          # mode an empty role denies everyone else.
+          role_attribute_path: "login == 'jovanvuleta' && 'GrafanaAdmin' || ''"
+          role_attribute_strict: true
+          allow_assign_grafana_admin: true
       admin:
         existingSecret: grafana-admin
         userKey: admin-user

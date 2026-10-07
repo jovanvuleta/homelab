@@ -4,6 +4,7 @@ resources:
   - namespace.yaml
   - helmrepository.yaml
   - grafana-admin.sops.yaml
+  - grafana-github-oauth.sops.yaml
   - alertmanager-telegram.sops.yaml
   - alertmanager-healthchecks.sops.yaml
   - helmrelease.yaml

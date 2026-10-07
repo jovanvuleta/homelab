@@ -1,5 +1,5 @@
-# Deliberately insecure manifest to test the Trivy PR check. Not referenced by
-# any Flux Kustomization, so it is never deployed. Delete with the test PR.
+# Test manifest for the Trivy PR check, now hardened. Not referenced by any
+# Flux Kustomization, so it is never deployed. Delete with the test PR.
 ---
 apiVersion: v1
 kind: Pod
@@ -7,8 +7,18 @@ metadata:
   name: trivy-test-bad
   namespace: default
 spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
   containers:
     - name: test
       image: busybox
       securityContext:
-        privileged: true
+        privileged: false
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]

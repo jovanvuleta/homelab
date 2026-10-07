@@ -20,7 +20,7 @@ spec:
               repository: ghcr.io/gethomepage/homepage
               tag: v2.4.0
             env:
-              HOMEPAGE_ALLOWED_HOSTS: homepage.tail65d0f1.ts.net
+              HOMEPAGE_ALLOWED_HOSTS: homepage.tail65d0f1.ts.net,homepage.homepage.svc.cluster.local:3000 # Tailscale URL + in-cluster name Gatus checks
               LOG_TARGETS: stdout
             resources:
               requests:

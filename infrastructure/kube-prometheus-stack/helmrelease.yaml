@@ -40,6 +40,9 @@ spec:
         podMonitorSelectorNilUsesHelmValues: false
         ruleSelectorNilUsesHelmValues: false
         storageSpec:
+          # local-path volumes ignore fsGroup, so a root-owned subPath isn't
+          # writable by Prometheus (uid 1000); mount the volume root instead.
+          disableMountSubPath: true
           volumeClaimTemplate:
             spec:
               storageClassName: local-path

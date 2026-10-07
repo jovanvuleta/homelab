@@ -51,6 +51,48 @@ spec:
                 requests:
                   storage: 15Gi
 
+    alertmanager:
+      alertmanagerSpec:
+        # Mounted at /etc/alertmanager/secrets/alertmanager-telegram/
+        secrets:
+          - alertmanager-telegram
+      config:
+        global:
+          resolve_timeout: 5m
+        route:
+          receiver: telegram
+          group_by: [alertname, namespace]
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 12h
+          routes:
+            # Always firing by design (proves the pipeline works); never notify.
+            - receiver: "null"
+              matchers:
+                - alertname = "Watchdog"
+            - receiver: "null"
+              matchers:
+                - alertname = "InfoInhibitor"
+        inhibit_rules:
+          # A critical alert silences the matching warning/info for the same thing.
+          - source_matchers: [severity = "critical"]
+            target_matchers: [severity =~ "warning|info"]
+            equal: [namespace, alertname]
+          - source_matchers: [severity = "warning"]
+            target_matchers: [severity = "info"]
+            equal: [namespace, alertname]
+          - source_matchers: [alertname = "InfoInhibitor"]
+            target_matchers: [severity = "info"]
+            equal: [namespace]
+        receivers:
+          - name: "null"
+          - name: telegram
+            telegram_configs:
+              - bot_token_file: /etc/alertmanager/secrets/alertmanager-telegram/bot-token
+                chat_id: 1578466488
+                parse_mode: HTML
+                send_resolved: true
+
     grafana:
       admin:
         existingSecret: grafana-admin

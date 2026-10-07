@@ -1,0 +1,37 @@
+# Trivy Operator: scans every running image for known CVEs, plus config
+# audits, exposed secrets in images and risky RBAC. Results become
+# Prometheus metrics (Grafana dashboard + alert in alerts.yaml).
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: trivy-operator
+  namespace: trivy-system
+spec:
+  interval: 1h
+  releaseName: trivy-operator
+  chart:
+    spec:
+      chart: trivy-operator
+      version: "0.37.0"
+      sourceRef:
+        kind: HelmRepository
+        name: aqua
+  install:
+    crds: Create
+  upgrade:
+    crds: CreateReplace
+  values:
+    operator:
+      # One shared Trivy server holds the vulnerability DB, instead of every
+      # scan job downloading it.
+      builtInTrivyServer: true
+      scanJobsConcurrentLimit: 2 # default 10 is a lot for one worker
+      # Node checks need privileged host access; Talos is read-only, no shell.
+      infraAssessmentScannerEnabled: false
+      clusterComplianceEnabled: false
+    trivy:
+      ignoreUnfixed: true # only CVEs with a fix, i.e. actionable via Renovate
+      storageClassName: local-path
+    serviceMonitor:
+      enabled: true

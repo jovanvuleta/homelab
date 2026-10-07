@@ -1,0 +1,24 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: trivy-alerts
+  namespace: trivy-system
+spec:
+  groups:
+    - name: trivy
+      rules:
+        # ignoreUnfixed means every counted CVE has a fixed version available.
+        - alert: FixableCriticalVulnerabilities
+          expr: |
+            sum by (namespace, image_repository, image_tag) (
+              trivy_image_vulnerabilities{severity="Critical"}
+            ) > 0
+          for: 1h
+          labels:
+            # info: visible in Grafana/Alertmanager, not sent to Telegram (quiet
+            # start). Switch to warning once the initial findings are handled.
+            severity: info
+          annotations:
+            summary: "{{ $labels.image_repository }}:{{ $labels.image_tag }} ({{ $labels.namespace }}) has {{ $value }} fixable critical CVE(s)."
+            description: A newer image fixes them; check Renovate PRs or bump the version.

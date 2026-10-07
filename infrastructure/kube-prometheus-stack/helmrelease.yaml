@@ -170,3 +170,9 @@ spec:
                 value: Prometheus
               - name: DS_LOKI
                 value: Loki
+          trivy-operator:
+            gnetId: 16337
+            revision: 16
+            datasource:
+              - name: DS_PROMETHEUS
+                value: Prometheus

@@ -1,0 +1,48 @@
+# Install once per clone: pre-commit install --hook-type pre-commit --hook-type commit-msg
+# Run everything:         pre-commit run --all-files
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.sops\.yaml$
+      - id: end-of-file-fixer
+        exclude: \.sops\.yaml$
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: detect-private-key
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        exclude: \.sops\.yaml$
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+
+  - repo: local
+    hooks:
+      - id: no-plaintext-secrets
+        name: Kubernetes Secrets must be SOPS-encrypted (*.sops.yaml)
+        language: pygrep
+        entry: '^kind:\s*Secret\s*$'
+        files: \.ya?ml$
+        exclude: \.sops\.yaml$
+      - id: tofu-fmt
+        name: OpenTofu files are formatted
+        language: system
+        entry: tofu fmt -check -diff
+        files: \.tf$

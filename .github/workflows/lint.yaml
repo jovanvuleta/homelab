@@ -18,3 +18,18 @@ jobs:
         with:
           tofu_wrapper: false
       - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+
+  trivy-config:
+    runs-on: ubuntu-24.04 # pinned GA image; ubuntu-latest moves without notice
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Misconfiguration scan of manifests and OpenTofu code; fails on new
+      # HIGH/CRITICAL findings. Accepted ones are listed in .trivyignore.yaml.
+      - uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          version: v0.75.0
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          trivyignores: .trivyignore.yaml

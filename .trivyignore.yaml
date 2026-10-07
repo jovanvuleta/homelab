@@ -1,0 +1,11 @@
+# Accepted `trivy config` findings. Keep each one scoped to its file and
+# explain why, so new findings elsewhere still fail CI.
+misconfigurations:
+  - id: KSV-0014
+    paths:
+      - infrastructure/local-path-provisioner/local-path-storage.yaml
+    statement: Upstream manifest, vendored as-is apart from documented changes; a read-only root filesystem for the provisioner is untested here.
+  - id: KSV-0118
+    paths:
+      - infrastructure/local-path-provisioner/local-path-storage.yaml
+    statement: Upstream manifest uses the default security context; hardening it is a separate, tested change.

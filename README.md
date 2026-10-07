@@ -34,3 +34,68 @@ apps/             self-hosted applications
 ## Secrets
 
 Secrets are encrypted with SOPS before they are committed; recipients are configured in `.sops.yaml`. No plaintext credential is ever stored in this repository.
+
+## Rebuilding from scratch
+
+Everything inside the cluster comes back from Git. These are the few one-time steps outside it.
+
+**Needs:** the age key (`~/.config/sops/age/keys.txt`, or the PGP recovery key), `sops`, `tofu`, `talosctl`, `kubectl`, `helm`.
+
+### 1. Proxmox host (`pve1`)
+
+The Immich photo library lives on an external USB drive (ext4, label `immich-data`) shared to the cluster over NFS.
+
+```bash
+mkdir -p /mnt/immich-data/immich
+echo 'LABEL=immich-data /mnt/immich-data ext4 defaults,nofail,x-systemd.device-timeout=10s 0 2' >> /etc/fstab
+mount -a
+
+apt install -y nfs-kernel-server
+echo '/mnt/immich-data 192.168.1.21(rw,sync,no_subtree_check,no_root_squash,mp,fsid=101) 192.168.1.34(rw,sync,no_subtree_check,no_root_squash,mp,fsid=101)' >> /etc/exports
+exportfs -ra
+```
+
+`mp` exports only while the drive is mounted, so an unplugged drive never lets uploads fill the host disk.
+
+### 2. VMs
+
+OpenTofu needs a Proxmox API token (`terraform@pve!tofu`, roles `PVEVMAdmin` on `/vms`, `PVEDatastoreUser` on `/storage`, `PVEAuditor` on `/`).
+
+```bash
+export PROXMOX_VE_API_TOKEN='terraform@pve!tofu=<secret>'
+cd proxmox && tofu init && tofu apply
+```
+
+The code describes the existing VMs and imports them; creating them from nothing has not been tested.
+
+### 3. Talos cluster
+
+Machine configs are generated from the encrypted secrets bundle and never committed (`talos/generated/` is ignored).
+
+```bash
+sops -d talos/talsecret.sops.yaml > /tmp/talsecret.yaml
+talosctl gen config talos-proxmox-cluster https://192.168.1.34:6443 \
+  --with-secrets /tmp/talsecret.yaml --output talos/generated \
+  --install-image factory.talos.dev/metal-installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba:v1.14.0
+rm /tmp/talsecret.yaml
+
+export TALOSCONFIG=talos/generated/talosconfig
+talosctl apply-config --insecure -n 192.168.1.34 -f talos/generated/controlplane.yaml
+talosctl apply-config --insecure -n 192.168.1.21 -f talos/generated/worker.yaml
+talosctl bootstrap -n 192.168.1.34 -e 192.168.1.34
+talosctl kubeconfig -n 192.168.1.34 -e 192.168.1.34
+```
+
+### 4. Flux
+
+```bash
+helm install flux-operator oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator \
+  --version 0.61.0 --namespace flux-system --create-namespace --wait
+
+kubectl create secret generic sops-age -n flux-system \
+  --from-file=age.agekey=$HOME/.config/sops/age/keys.txt
+
+kubectl apply -f clusters/homelab/flux-instance.yaml
+```
+
+Flux then installs everything else from `clusters/homelab/` in dependency order. Check progress with `kubectl get kustomizations,helmreleases -A`.

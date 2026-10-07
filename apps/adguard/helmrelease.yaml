@@ -1,0 +1,78 @@
+# AdGuard Home: DNS-level ad/tracker blocking for every device on the tailnet.
+# Settings (filters, admin login) live in the app's own config on the volume,
+# created through its first-run wizard; they are not managed from Git.
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: adguard
+  namespace: adguard
+spec:
+  interval: 1h
+  releaseName: adguard
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  values:
+    controllers:
+      adguard:
+        strategy: Recreate # single volume, single writer
+        containers:
+          app:
+            image:
+              repository: adguard/adguardhome
+              tag: v0.107.79
+            resources:
+              requests:
+                cpu: 20m
+                memory: 64Mi
+              limits:
+                memory: 512Mi
+
+    service:
+      app:
+        controller: adguard
+        ports:
+          http:
+            port: 3000 # web UI; keep 3000 when the setup wizard asks
+      dns:
+        controller: adguard
+        # Tailscale operator gives this Service its own tailnet IP: the
+        # nameserver to set in the Tailscale admin console (DNS settings).
+        type: LoadBalancer
+        loadBalancerClass: tailscale
+        annotations:
+          tailscale.com/hostname: adguard-dns
+        ports:
+          dns-udp:
+            port: 53
+            protocol: UDP
+          dns-tcp:
+            port: 53
+            protocol: TCP
+
+    ingress:
+      app:
+        className: tailscale
+        hosts:
+          - host: "" # tailscale drops rules that carry a host
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - adguard # MagicDNS name: adguard.<tailnet>.ts.net
+
+    persistence:
+      data:
+        type: persistentVolumeClaim
+        storageClass: local-path
+        accessMode: ReadWriteOnce
+        size: 2Gi
+        globalMounts:
+          - path: /opt/adguardhome/conf
+            subPath: conf
+          - path: /opt/adguardhome/work
+            subPath: work

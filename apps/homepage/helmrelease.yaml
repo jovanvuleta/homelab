@@ -85,6 +85,11 @@ spec:
                     href: https://homeassistant.tail65d0f1.ts.net
                     icon: home-assistant.png
                     description: Home automation
+                - AdGuard Home:
+                    href: https://adguard.tail65d0f1.ts.net
+                    icon: adguard-home.png
+                    description: Ad and tracker blocking (tailnet DNS)
+                    siteMonitor: http://adguard-app.adguard.svc.cluster.local:3000
             - Monitoring:
                 - Grafana:
                     href: https://grafana.tail65d0f1.ts.net

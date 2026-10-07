@@ -57,6 +57,17 @@ spec:
           interval: 1m
           conditions: ["[CONNECTED] == true"]
           alerts: [{ type: telegram }]
+        # Tailnet DNS depends on this: if it stops answering, devices with
+        # Tailscale on can't resolve anything.
+        - name: AdGuard DNS
+          group: apps
+          url: adguard-dns.adguard.svc.cluster.local
+          interval: 1m
+          dns:
+            query-name: example.com
+            query-type: A
+          conditions: ["[DNS_RCODE] == NOERROR"]
+          alerts: [{ type: telegram }]
         - name: Homepage
           group: apps
           url: http://homepage.homepage.svc.cluster.local:3000

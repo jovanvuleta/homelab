@@ -3,3 +3,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: tailscale
+  labels:
+    # Proxies for LoadBalancer Services (e.g. AdGuard DNS) run a privileged
+    # init container to enable IP forwarding; baseline PodSecurity forbids it.
+    pod-security.kubernetes.io/enforce: privileged

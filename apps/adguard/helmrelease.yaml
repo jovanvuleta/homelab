@@ -34,7 +34,7 @@ spec:
         controller: adguard
         ports:
           http:
-            port: 3000 # web UI; keep 3000 when the setup wizard asks
+            port: 80 # web UI port chosen in the setup wizard (the wizard itself runs on 3000)
       dns:
         controller: adguard
         # Tailscale operator gives this Service its own tailnet IP: the

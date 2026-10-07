@@ -1,0 +1,13 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "Europe/Belgrade",
+  "schedule": ["* 0-8 * * 6"],
+  "ignorePaths": [
+    "apps/immich/values.yaml",
+    "infrastructure/tailscale-operator/values.yaml"
+  ],
+  "flux": {
+    "managerFilePatterns": ["/\\.ya?ml$/"]
+  }
+}

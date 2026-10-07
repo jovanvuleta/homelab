@@ -17,3 +17,40 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: homepage
+  namespace: flux-system
+spec:
+  interval: 1h
+  path: ./apps/homepage
+  prune: true
+  wait: true
+  dependsOn:
+    - name: tailscale-operator
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: gatus
+  namespace: flux-system
+spec:
+  interval: 1h
+  path: ./apps/gatus
+  prune: true
+  wait: true
+  dependsOn:
+    - name: tailscale-operator
+    - name: local-path-provisioner
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age

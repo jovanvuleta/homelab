@@ -1,0 +1,91 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gatus
+  namespace: gatus
+spec:
+  interval: 1h
+  releaseName: gatus
+  chart:
+    spec:
+      chart: gatus
+      version: "1.5.0"
+      sourceRef:
+        kind: HelmRepository
+        name: twin
+  values:
+    image:
+      tag: v5.37.0 # chart 1.5.0 ships v5.34.0
+    envFrom:
+      - secretRef:
+          name: gatus-telegram # TELEGRAM_BOT_TOKEN
+    persistence:
+      enabled: true
+      size: 1Gi
+      storageClassName: local-path
+    ingress:
+      enabled: true
+      ingressClassName: tailscale
+      hosts: [] # tailscale drops rules that carry a host
+      tls:
+        - hosts:
+            - status # MagicDNS name: status.<tailnet>.ts.net
+    config:
+      storage:
+        type: sqlite
+        path: /data/data.db
+      alerting:
+        telegram:
+          token: "${TELEGRAM_BOT_TOKEN}"
+          id: "1578466488"
+          default-alert:
+            enabled: true
+            send-on-resolved: true
+            failure-threshold: 3
+            success-threshold: 2
+      endpoints:
+        - name: Immich
+          group: apps
+          url: http://immich-server.immich.svc.cluster.local:2283/api/server/ping
+          interval: 1m
+          conditions: ["[STATUS] == 200", "[BODY].res == pong"]
+          alerts: [{ type: telegram }]
+        - name: Immich database
+          group: apps
+          url: tcp://immich-database-rw.immich.svc.cluster.local:5432
+          interval: 1m
+          conditions: ["[CONNECTED] == true"]
+          alerts: [{ type: telegram }]
+        - name: Homepage
+          group: apps
+          url: http://homepage.homepage.svc.cluster.local:3000
+          interval: 5m
+          conditions: ["[STATUS] == 200"]
+          alerts: [{ type: telegram }]
+        - name: Grafana
+          group: monitoring
+          url: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local/api/health
+          interval: 5m
+          conditions: ["[STATUS] == 200"]
+          alerts: [{ type: telegram }]
+        - name: Prometheus
+          group: monitoring
+          url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/-/healthy
+          interval: 5m
+          conditions: ["[STATUS] == 200"]
+          alerts: [{ type: telegram }]
+        - name: Alertmanager
+          group: monitoring
+          url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093/-/healthy
+          interval: 5m
+          conditions: ["[STATUS] == 200"]
+          alerts: [{ type: telegram }]
+        - name: Proxmox
+          group: infrastructure
+          url: https://192.168.1.50:8006
+          interval: 5m
+          client:
+            insecure: true # Proxmox's self-signed certificate
+          conditions: ["[STATUS] == 200"]
+          alerts: [{ type: telegram }]

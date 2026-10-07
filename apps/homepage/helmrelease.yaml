@@ -112,6 +112,7 @@ spec:
                     siteMonitor: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local/api/health
                     widget:
                       type: grafana
+                      version: 2 # Grafana 11+ removed the legacy /api/alerts endpoint
                       url: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local
                       username: admin
                       password: '{{ "{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}" }}'

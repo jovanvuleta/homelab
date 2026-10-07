@@ -1,0 +1,45 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: homelab-alerts
+  namespace: monitoring
+spec:
+  groups:
+    - name: homelab
+      rules:
+        # The default rules only catch repeated restarts; a single OOM kill
+        # would otherwise go unnoticed.
+        - alert: ContainerOOMKilled
+          expr: |
+            (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1)
+            and ignoring (reason)
+            min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1
+          labels:
+            severity: warning
+          annotations:
+            summary: Container {{ $labels.namespace }}/{{ $labels.pod }}/{{ $labels.container }} was OOM-killed.
+            description: It used more memory than it is allowed or the node had left, and was restarted.
+
+        # The Immich library lives on one external USB drive; warn well before
+        # it fills so there is time to replace it.
+        - alert: ImmichLibraryAlmostFull
+          expr: |
+            kubelet_volume_stats_used_bytes{namespace="immich", persistentvolumeclaim="immich-library"}
+              / kubelet_volume_stats_capacity_bytes{namespace="immich", persistentvolumeclaim="immich-library"} > 0.85
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: Immich photo library drive is {{ $value | humanizePercentage }} full.
+            description: The USB drive on pve1 holding the Immich library is above 85% used.
+        - alert: ImmichLibraryAlmostFull
+          expr: |
+            kubelet_volume_stats_used_bytes{namespace="immich", persistentvolumeclaim="immich-library"}
+              / kubelet_volume_stats_capacity_bytes{namespace="immich", persistentvolumeclaim="immich-library"} > 0.95
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: Immich photo library drive is {{ $value | humanizePercentage }} full.
+            description: Uploads will start failing soon; free space or move the library to a larger drive.

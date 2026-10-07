@@ -73,6 +73,11 @@ spec:
             - receiver: "null"
               matchers:
                 - alertname = "InfoInhibitor"
+            # Informational alerts (e.g. CPUThrottlingHigh) are visible in
+            # Grafana/Alertmanager but not worth a phone notification.
+            - receiver: "null"
+              matchers:
+                - severity = "info"
         inhibit_rules:
           # A critical alert silences the matching warning/info for the same thing.
           - source_matchers: [severity = "critical"]

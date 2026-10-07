@@ -6,3 +6,4 @@ resources:
   - grafana-admin.sops.yaml
   - alertmanager-telegram.sops.yaml
   - helmrelease.yaml
+  - homelab-alerts.yaml

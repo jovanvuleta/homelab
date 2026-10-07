@@ -1,0 +1,28 @@
+# Managed by the Flux Operator: installs Flux and syncs this repository.
+# Lives in the synced path, so changes here (e.g. the Flux version) apply via Git.
+---
+apiVersion: fluxcd.controlplane.io/v1
+kind: FluxInstance
+metadata:
+  name: flux
+  namespace: flux-system
+spec:
+  distribution:
+    version: "2.9.x"
+    registry: ghcr.io/fluxcd
+  components:
+    - source-controller
+    - kustomize-controller
+    - helm-controller
+    - notification-controller
+  cluster:
+    type: kubernetes
+    multitenant: false
+    networkPolicy: true
+    domain: cluster.local
+  sync:
+    kind: GitRepository
+    url: https://github.com/jovanvuleta/homelab.git
+    ref: refs/heads/main
+    path: clusters/homelab
+    pullSecret: flux-system

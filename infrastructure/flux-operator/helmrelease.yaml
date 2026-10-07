@@ -1,0 +1,14 @@
+# Flux upgrades the operator that manages Flux. The release name matches the
+# initial one-off `helm install flux-operator`, so Flux adopts that release.
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: flux-operator
+  namespace: flux-system
+spec:
+  interval: 1h
+  releaseName: flux-operator
+  chartRef:
+    kind: OCIRepository
+    name: flux-operator

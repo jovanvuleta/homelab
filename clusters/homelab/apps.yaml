@@ -1,0 +1,19 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: immich
+  namespace: flux-system
+spec:
+  interval: 1h
+  path: ./apps/immich
+  prune: true
+  wait: true
+  timeout: 10m
+  dependsOn:
+    - name: local-path-provisioner
+    - name: cloudnative-pg
+    - name: tailscale-operator
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

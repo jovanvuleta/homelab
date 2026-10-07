@@ -15,6 +15,7 @@ Everything the cluster runs is declared in this repository. Secrets are committe
 
 **Observability**
 - **kube-prometheus-stack**: Prometheus, Grafana (GitHub sign-in) and Alertmanager.
+- **Loki + Grafana Alloy**: every container's logs and Kubernetes events, searchable in Grafana for 7 days.
 - Alerts go to **Telegram**; a **healthchecks.io** heartbeat reports when the whole homelab is down.
 - **[Gatus](https://gatus.io/)**: uptime checks for every service, also alerting to Telegram.
 

@@ -25,4 +25,3 @@ spec:
     url: https://github.com/jovanvuleta/homelab.git
     ref: refs/heads/main
     path: clusters/homelab
-    pullSecret: flux-system

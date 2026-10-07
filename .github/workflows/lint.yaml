@@ -21,15 +21,73 @@ jobs:
 
   trivy-config:
     runs-on: ubuntu-24.04 # pinned GA image; ubuntu-latest moves without notice
+    permissions:
+      contents: read
+      pull-requests: write # comment the findings on the PR
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # Misconfiguration scan of manifests and OpenTofu code; fails on new
-      # HIGH/CRITICAL findings. Accepted ones are listed in .trivyignore.yaml.
+      # Misconfiguration scan of manifests and OpenTofu code. Accepted findings
+      # are listed in .trivyignore.yaml; anything new HIGH/CRITICAL fails below.
       - uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:
           version: v0.75.0
           scan-type: config
           scan-ref: .
           severity: HIGH,CRITICAL
-          exit-code: "1"
+          exit-code: "0" # report first; the last step fails the job
+          format: json
+          output: trivy-config.json
           trivyignores: .trivyignore.yaml
+
+      - name: Summarize findings
+        id: summary
+        run: |
+          count=$(jq '[.Results[]?.Misconfigurations[]?] | length' trivy-config.json)
+          {
+            echo '<!-- trivy-config -->' # lets find-comment locate this comment
+            if [ "$count" -gt 0 ]; then
+              echo "### ❌ Trivy found $count HIGH/CRITICAL misconfiguration(s)"
+              echo
+              echo "This PR can't be merged until they're fixed, or accepted with a reason in \`.trivyignore.yaml\`."
+              echo
+              echo '| Severity | File | Rule | Issue |'
+              echo '|---|---|---|---|'
+              jq -r '.Results[]? | .Target as $t | .Misconfigurations[]? | "| \(.Severity) | `\($t)`:\(.CauseMetadata.StartLine // "") | [\(.ID)](\(.PrimaryURL)) | \(.Message) |"' trivy-config.json
+            else
+              echo '### ✅ Trivy: no HIGH/CRITICAL misconfigurations'
+            fi
+          } > comment.md
+          cat comment.md >> "$GITHUB_STEP_SUMMARY"
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+
+      # One comment per PR, found again by its hidden marker: created on the
+      # first findings, updated on later pushes, switched to ✅ once fixed.
+      # Clean PRs get no comment. Fork PRs get a read-only token, so skipped.
+      - name: Find an earlier Trivy comment
+        id: find-comment
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: github-actions[bot]
+          body-includes: <!-- trivy-config -->
+
+      - name: Create or update the Trivy comment
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          (steps.summary.outputs.count != '0' || steps.find-comment.outputs.comment-id != '')
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          body-path: comment.md
+          edit-mode: replace
+
+      - name: Fail on findings
+        if: steps.summary.outputs.count != '0'
+        run: |
+          echo "::error::Trivy found ${{ steps.summary.outputs.count }} HIGH/CRITICAL misconfiguration(s); see the job summary."
+          exit 1

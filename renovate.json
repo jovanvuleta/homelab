@@ -21,5 +21,22 @@
     "managerFilePatterns": [
       "/(^|/)helmrelease\\.ya?ml$/"
     ]
-  }
+  },
+  "kubernetes": {
+    "managerFilePatterns": [
+      "/infrastructure/local-path-provisioner/.+\\.ya?ml$/"
+    ]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Image tags pinned with a `# renovate:` hint in HelmRelease values",
+      "managerFilePatterns": [
+        "/(^|/)helmrelease\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+tag: (?<currentValue>\\S+)"
+      ]
+    }
+  ]
 }

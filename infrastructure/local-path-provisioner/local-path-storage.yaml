@@ -1,4 +1,4 @@
-# Vendored from https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.31/deploy/local-path-storage.yaml
+# Vendored from https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.37/deploy/local-path-storage.yaml
 # with two changes for this cluster:
 #   - host path moved from /opt/local-path-provisioner to /var/local-path-provisioner:
 #     Talos's kubelet container only bind-mounts /var persistently from the host,
@@ -103,7 +103,7 @@ spec:
       serviceAccountName: local-path-provisioner-service-account
       containers:
         - name: local-path-provisioner
-          image: rancher/local-path-provisioner:v0.0.31
+          image: docker.io/rancher/local-path-provisioner:v0.0.37
           imagePullPolicy: IfNotPresent
           command:
             - local-path-provisioner
@@ -111,6 +111,29 @@ spec:
             - start
             - --config
             - /etc/config/config.json
+          ports:
+            - name: health
+              containerPort: 8080
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 5
           volumeMounts:
             - name: config-volume
               mountPath: /etc/config/
@@ -121,6 +144,8 @@ spec:
                   fieldPath: metadata.namespace
             - name: CONFIG_MOUNT_PATH
               value: /etc/config/
+            - name: HEALTH_PORT
+              value: "8080"
       volumes:
         - name: config-volume
           configMap:
@@ -172,5 +197,5 @@ data:
           effect: NoSchedule
       containers:
       - name: helper-pod
-        image: busybox
+        image: docker.io/library/busybox
         imagePullPolicy: IfNotPresent

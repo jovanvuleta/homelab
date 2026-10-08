@@ -63,3 +63,8 @@ spec:
       enabled: false
     test:
       enabled: false
+    # Loads Loki alert rules from ConfigMaps; unused (alerts are Prometheus
+    # rules), and its pinned k8s-sidecar image carried critical CVEs.
+    sidecar:
+      rules:
+        enabled: false

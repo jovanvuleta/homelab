@@ -22,6 +22,12 @@ spec:
       main:
         containers:
           main:
+            # Shared by server and machine-learning. Chart 0.13.4 ships v3.2.0;
+            # v3.3.0 fixes most critical CVEs Trivy found. Drop this once the
+            # chart's appVersion catches up.
+            image:
+              # renovate: datasource=github-releases depName=immich-app/immich
+              tag: v3.3.0
             env:
               # ours: point at the CloudNativePG cluster's auto-generated app secret
               DB_HOSTNAME:

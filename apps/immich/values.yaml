@@ -18,7 +18,7 @@ controllers:
     containers:
       main:
         image:
-          tag: v3.2.0
+          tag: v3.3.0 # ours: pinned in helmrelease.yaml (chart 0.13.4 ships v3.2.0)
         env:
           REDIS_HOSTNAME: '{{ printf "%s-valkey" .Release.Name }}'
           IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'

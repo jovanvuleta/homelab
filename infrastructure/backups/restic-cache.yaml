@@ -1,0 +1,14 @@
+# restic's local metadata cache: keeps nightly runs fast and avoids
+# re-downloading repository indexes from B2 (fewer paid API calls).
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: restic-cache
+  namespace: backups
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi

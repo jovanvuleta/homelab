@@ -25,8 +25,11 @@ Everything the cluster runs is declared in this repository. Secrets are committe
 - **[AdGuard Home](https://adguard.com/adguard-home/overview.html)**: DNS-level ad and tracker blocking for every device on the tailnet.
 - **[Homepage](https://gethomepage.dev/)**: start page linking everything, with live status.
 
+**Backups**
+- Nightly **restic** backups to **Backblaze B2** (encrypted, versioned) of the Immich database dumps and Home Assistant's backups. Home Assistant writes its backups to a share on `pve1`.
+
 **Planned**
-- Backups: off-site copies of the photo library and databases.
+- Off-site backup of the photo library itself.
 - More self-hosted services over time.
 
 ## Layout

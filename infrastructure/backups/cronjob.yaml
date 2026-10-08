@@ -1,0 +1,89 @@
+# Nightly off-site backup to Backblaze B2 (restic: encrypted, deduplicated,
+# versioned). Covers the small, irreplaceable data that fits B2's free 10 GB:
+#   - Immich database dumps (written daily by Immich into its backups/ folder)
+#   - Home Assistant backups (Home Assistant writes them to a share on pve1)
+# Both are mounted read-only from pve1's USB drive over NFS.
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: restic-b2
+  namespace: backups
+spec:
+  schedule: "0 5 * * *" # after Immich's 02:00 dump and Home Assistant's nightly backup
+  timeZone: Europe/Belgrade
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 3600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 7200
+      template:
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: restic
+              image: restic/restic:0.19.1
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  restic cat config >/dev/null 2>&1 || restic init
+                  restic unlock # clears locks left by an interrupted run
+                  restic backup /backup --host homelab --tag nightly
+                  restic forget --host homelab --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune
+                  restic check
+              envFrom:
+                - secretRef:
+                    name: restic-b2 # B2 key, repository URL, restic password
+              env:
+                - name: RESTIC_CACHE_DIR
+                  value: /cache
+                - name: HOME
+                  value: /tmp
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  memory: 512Mi
+              volumeMounts:
+                - name: immich-db-dumps
+                  mountPath: /backup/immich-db
+                  readOnly: true
+                - name: home-assistant
+                  mountPath: /backup/home-assistant
+                  readOnly: true
+                - name: cache
+                  mountPath: /cache
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: immich-db-dumps
+              nfs:
+                server: 192.168.1.50 # pve1
+                path: /mnt/immich-data/immich/backups
+                readOnly: true
+            - name: home-assistant
+              nfs:
+                server: 192.168.1.50
+                path: /mnt/immich-data/ha-backups
+                readOnly: true
+            - name: cache
+              persistentVolumeClaim:
+                claimName: restic-cache
+            - name: tmp
+              emptyDir: {}

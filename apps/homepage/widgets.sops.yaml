@@ -6,7 +6,7 @@ metadata:
 stringData:
     HOMEPAGE_VAR_IMMICH_KEY: ENC[AES256_GCM,data:ZDFwBpoduOvhjtgozycvemme4RZZen1zUb2ViTmD/9e/zvqMmu5srkrb,iv:onaCPsZqUEv4igOAOi0+Aph9cxRZh+H+LiN/15uoQsg=,tag:dqcm0E5AZV2q6xBKf6ftyw==,type:str]
     HOMEPAGE_VAR_ADGUARD_USER: ENC[AES256_GCM,data:eXzhvns=,iv:SrovQE4AIjc2eEdf1McIZL2FqIz0bIWXdUCGkvmcBf8=,tag:tO/dF+/FMr1NVXERiQRqhw==,type:str]
-    HOMEPAGE_VAR_ADGUARD_PASSWORD: ENC[AES256_GCM,data:L7OwYuk=,iv:rajvkNsOxfzRUGKkx6LllDkcuhucS6qM4tTvjCcFWU0=,tag:lqbbHRFI30bd3peT3OkSOg==,type:str]
+    HOMEPAGE_VAR_ADGUARD_PASSWORD: ENC[AES256_GCM,data:+BTjpszSY3jdaGokwLNU9hP4fm0UpWzw,iv:LiR+qPF8An6N7CajAQVSag9MY6cHuMw511txMrbeMQo=,tag:DQZ4/h+pVRLwMQ8B9Nm0nQ==,type:str]
     HOMEPAGE_VAR_GRAFANA_PASSWORD: ENC[AES256_GCM,data:ISXNjCEHICGIJswviBmFLVVH9bZSLxxix1StSj0K6Q==,iv:EtzbAH9kyTftufYne3nh1IQZTbLLcGk7wKz5JUoCVt8=,tag:1UkkBNb/hGK95EG8tPlE6w==,type:str]
 sops:
     age:
@@ -19,8 +19,8 @@ sops:
             NXJ4a0xHd0NzME9rQ0tMZjZ3MTF6aEEKgLhaJHms/wJFN5ichZPfSZ0JBTux1c6D
             mKCiHxbPrXhsTVU0uBfiQxeyB0wh6f1oy6WwrI/4rpTuCCbSxI+MSg==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-10-07T21:36:16Z"
-    mac: ENC[AES256_GCM,data:ymc1Fn3Rb/vSAxjP8E588yzf9UfJ4exmPSC/oRnR3HBQsJUGG/9+tgkORiJzRjIjxgVvUHmq9cNcGtXWUg3lvkHKvb3n8zTzcE2G1ji3D/PgLOLfYm1/QJMv3TO6+Qgk2wqlNawcNL4foZ2X/Y7YR35I1HajbgbMiC4tULgGm2Y=,iv:ZgIOw/iSlaW7zkR8NItXLlQksj/e6RfQm1sBzMR4Sko=,tag:iDFk+XRUJG4Acq9cxhLZkg==,type:str]
+    lastmodified: "2026-10-09T18:02:21Z"
+    mac: ENC[AES256_GCM,data:bafTnqpwZ43MvA0sQzS5llj7GkK5bF2klkgRH2oxeHjR0aNFFk1nDpxFmK0lV9vTJ8byYcS59MAvO+lPFqEdFLAYiFxOg0cr2qFA+m1eTA5pZrLXucnvolvQO9mNdWH04EKdEFlYOj3xN02iCuKrMeU7uRdIDsH5rWsz5S3+z04=,iv:dvMDp7NRNrj3DoBU1414FrqJKosFIdb8DPidMXEnHC0=,tag:ItuQO9029JVMd6cN/A+Beg==,type:str]
     pgp:
         - created_at: "2026-10-07T21:24:44Z"
           enc: |-

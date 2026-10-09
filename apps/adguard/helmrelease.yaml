@@ -22,6 +22,14 @@ spec:
             image:
               repository: adguard/adguardhome
               tag: v0.107.79
+            # Image defaults, with config and work dirs moved inside the one
+            # volume mount (see persistence below).
+            args:
+              - --no-check-update
+              - -c
+              - /opt/adguardhome/data/conf/AdGuardHome.yaml
+              - -w
+              - /opt/adguardhome/data/work
             resources:
               requests:
                 cpu: 20m
@@ -71,8 +79,8 @@ spec:
         storageClass: local-path
         accessMode: ReadWriteOnce
         size: 2Gi
+        # No subPath: on Talos, subPath mounts of local-path volumes land in the
+        # kubelet container's overlay instead of the disk and vanish on reboot
+        # (/var/local-path-provisioner isn't an rshared kubelet extraMount).
         globalMounts:
-          - path: /opt/adguardhome/conf
-            subPath: conf
-          - path: /opt/adguardhome/work
-            subPath: work
+          - path: /opt/adguardhome/data

@@ -39,6 +39,7 @@ clusters/homelab/ Flux entry point: the FluxInstance and what to sync, in order
 infrastructure/   cluster-wide components: storage, operators, networking, monitoring
 apps/             self-hosted applications
 proxmox/          Proxmox VMs (Home Assistant, Talos nodes), managed with OpenTofu
+tailscale/        tailnet access policy and DNS settings, managed with OpenTofu
 talos/            Talos cluster secrets (SOPS-encrypted)
 ```
 

@@ -11,3 +11,6 @@ talos/tailscale-operator-secret.yaml
 proxmox/.terraform/
 proxmox/tfplan
 proxmox/terraform.tfstate*
+tailscale/.terraform/
+tailscale/tfplan
+tailscale/terraform.tfstate*

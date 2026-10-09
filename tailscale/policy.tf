@@ -38,6 +38,14 @@ resource "tailscale_acl" "this" {
         dst    = ["autogroup:self"]
         users  = ["autogroup:nonroot", "root"]
       },
+      {
+        # Tagged servers (pve1, Home Assistant) aren't "owned" devices, so
+        # autogroup:self above no longer covers them.
+        action = "check"
+        src    = ["autogroup:member"]
+        dst    = ["tag:server"]
+        users  = ["autogroup:nonroot", "root"]
+      },
     ]
 
     # Checked by Tailscale on every save; a failing test rejects the policy.

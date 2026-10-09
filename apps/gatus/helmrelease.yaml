@@ -68,6 +68,12 @@ spec:
             query-type: A
           conditions: ["[DNS_RCODE] == NOERROR"]
           alerts: [{ type: telegram }]
+        - name: Copyparty
+          group: apps
+          url: http://copyparty.copyparty.svc.cluster.local:3923/
+          interval: 5m
+          conditions: ["[STATUS] == 200"]
+          alerts: [{ type: telegram }]
         - name: Homepage
           group: apps
           url: http://homepage.homepage.svc.cluster.local:3000

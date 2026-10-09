@@ -23,6 +23,7 @@ Everything the cluster runs is declared in this repository. Secrets are committe
 - **[Immich](https://immich.app/)**: self-hosted photo and video library, replacing cloud photo storage.
 - **[Home Assistant](https://www.home-assistant.io/)**: home automation, running as its own VM on Proxmox.
 - **[AdGuard Home](https://adguard.com/adguard-home/overview.html)**: DNS-level ad and tracker blocking for every device on the tailnet.
+- **[Copyparty](https://github.com/9001/copyparty)**: web file server for a shared folder on the USB drive; upload and download from any tailnet device's browser, no login.
 - **[Homepage](https://gethomepage.dev/)**: start page linking everything, with live status.
 
 **Backups**

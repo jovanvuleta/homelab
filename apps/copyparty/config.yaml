@@ -1,0 +1,29 @@
+# Copyparty settings. No login: only tailnet devices can reach it
+# (Tailscale ingress, no Funnel), and the tailnet is just the owner's devices.
+# Going public would need accounts back (and Funnel or a Cloudflare Tunnel).
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: copyparty-config
+  namespace: copyparty
+data:
+  copyparty.conf: |
+    [global]
+      # index all files: search, and skips re-uploading duplicates
+      e2dsa
+      # read media tags (music, video)
+      e2ts
+      # index + thumbnails on the local volume, not the NFS share
+      hist: /cfg/hist
+      # trust X-Forwarded-For from the Tailscale ingress proxy
+      xff-src: lan
+
+    # everyone who can reach it: read, write, move, delete, admin
+    [/]
+      /w
+      accs:
+        rwmda: *
+      flags:
+        # refuse uploads once the folder holds 50 GiB (NFS itself has no quota)
+        vmaxb: 50g

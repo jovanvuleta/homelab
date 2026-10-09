@@ -104,6 +104,11 @@ spec:
                       url: http://adguard-app.adguard.svc.cluster.local
                       username: '{{ "{{HOMEPAGE_VAR_ADGUARD_USER}}" }}'
                       password: '{{ "{{HOMEPAGE_VAR_ADGUARD_PASSWORD}}" }}'
+                - Copyparty:
+                    href: https://files.tail65d0f1.ts.net
+                    icon: copyparty.png
+                    description: Shared files (web, upload from any device)
+                    siteMonitor: http://copyparty.copyparty.svc.cluster.local:3923
             - Monitoring:
                 - Grafana:
                     href: https://grafana.tail65d0f1.ts.net

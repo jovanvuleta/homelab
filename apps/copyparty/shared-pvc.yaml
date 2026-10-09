@@ -1,0 +1,33 @@
+# The shared folder on pve1's USB drive (next to Immich's library), over the
+# same NFS export. Size is nominal: NFS doesn't enforce it, the drive is shared
+# with Immich and watched by the ImmichLibraryAlmostFull alert.
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: copyparty-shared
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes: ["ReadWriteMany"]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  claimRef:
+    namespace: copyparty
+    name: copyparty-shared
+  nfs:
+    server: 192.168.1.50 # pve1
+    path: /mnt/immich-data/shared
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: copyparty-shared
+  namespace: copyparty
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: ""
+  volumeName: copyparty-shared
+  resources:
+    requests:
+      storage: 50Gi

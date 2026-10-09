@@ -20,7 +20,7 @@ spec:
               repository: ghcr.io/gethomepage/homepage
               tag: v2.4.0
             env:
-              HOMEPAGE_ALLOWED_HOSTS: homepage.tail65d0f1.ts.net,homepage.homepage.svc.cluster.local:3000 # Tailscale URL + in-cluster name Gatus checks
+              HOMEPAGE_ALLOWED_HOSTS: homepage.antelope-armadillo.ts.net,homepage.homepage.svc.cluster.local:3000 # Tailscale URL + in-cluster name Gatus checks
               LOG_TARGETS: stdout
             # HOMEPAGE_VAR_* values, referenced in services.yaml as {{HOMEPAGE_VAR_...}}
             envFrom:
@@ -81,7 +81,7 @@ spec:
           services.yaml: |
             - Apps:
                 - Immich:
-                    href: https://immich.tail65d0f1.ts.net
+                    href: https://immich.antelope-armadillo.ts.net
                     icon: immich.png
                     description: Photos and videos
                     siteMonitor: http://immich-server.immich.svc.cluster.local:2283/api/server/ping
@@ -91,11 +91,11 @@ spec:
                       key: '{{ "{{HOMEPAGE_VAR_IMMICH_KEY}}" }}'
                       version: 2
                 - Home Assistant:
-                    href: https://homeassistant.tail65d0f1.ts.net
+                    href: https://homeassistant.antelope-armadillo.ts.net
                     icon: home-assistant.png
                     description: Home automation
                 - AdGuard Home:
-                    href: https://adguard.tail65d0f1.ts.net
+                    href: https://adguard.antelope-armadillo.ts.net
                     icon: adguard-home.png
                     description: Ad and tracker blocking (tailnet DNS)
                     siteMonitor: http://adguard-app.adguard.svc.cluster.local
@@ -105,13 +105,13 @@ spec:
                       username: '{{ "{{HOMEPAGE_VAR_ADGUARD_USER}}" }}'
                       password: '{{ "{{HOMEPAGE_VAR_ADGUARD_PASSWORD}}" }}'
                 - Copyparty:
-                    href: https://files.tail65d0f1.ts.net
+                    href: https://files.antelope-armadillo.ts.net
                     icon: copyparty.png
                     description: Shared files (web, upload from any device)
                     siteMonitor: http://copyparty.copyparty.svc.cluster.local:3923
             - Monitoring:
                 - Grafana:
-                    href: https://grafana.tail65d0f1.ts.net
+                    href: https://grafana.antelope-armadillo.ts.net
                     icon: grafana.png
                     description: Dashboards
                     siteMonitor: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local/api/health
@@ -122,7 +122,7 @@ spec:
                       username: admin
                       password: '{{ "{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}" }}'
                 - Status:
-                    href: https://status.tail65d0f1.ts.net
+                    href: https://status.antelope-armadillo.ts.net
                     icon: gatus.png
                     description: Service uptime (Gatus)
                     siteMonitor: http://gatus.gatus.svc.cluster.local
@@ -134,7 +134,7 @@ spec:
                       url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
             - Infrastructure:
                 - Proxmox:
-                    href: https://pve1.tail65d0f1.ts.net:8006
+                    href: https://pve1.antelope-armadillo.ts.net:8006
                     icon: proxmox.png
                     description: pve1 hypervisor
                 - GitHub:

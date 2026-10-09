@@ -115,7 +115,7 @@ spec:
       envFromSecret: grafana-github-oauth
       grafana.ini:
         server:
-          root_url: https://grafana.tail65d0f1.ts.net # OAuth callback base
+          root_url: https://grafana.antelope-armadillo.ts.net # OAuth callback base
         auth.github:
           enabled: true
           allow_sign_up: true

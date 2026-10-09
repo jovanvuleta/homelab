@@ -11,7 +11,7 @@ Everything the cluster runs is declared in this repository. Secrets are committe
 - **Flux** (via the Flux Operator): GitOps. The cluster reconciles itself from this repository.
 - **Tailscale operator**: private access to services over the tailnet, with HTTPS and no ports open to the internet.
 - **CloudNativePG**: PostgreSQL operator for app databases.
-- **local-path-provisioner**: node-local storage, plus NFS for bulk media.
+- **local-path-provisioner**: node-local storage, plus NFS for bulk media. Never mount a local-path volume with `subPath`: on Talos 1.14 such mounts land in the kubelet's container layer instead of the disk and are lost on reboot.
 
 **Observability**
 - **kube-prometheus-stack**: Prometheus, Grafana (GitHub sign-in) and Alertmanager.
@@ -72,7 +72,7 @@ echo 'LABEL=immich-data /mnt/immich-data ext4 defaults,nofail,x-systemd.device-t
 mount -a
 
 apt install -y nfs-kernel-server
-echo '/mnt/immich-data 192.168.1.21(rw,sync,no_subtree_check,no_root_squash,mp,fsid=101) 192.168.1.34(rw,sync,no_subtree_check,no_root_squash,mp,fsid=101)' >> /etc/exports
+echo '/mnt/immich-data 192.168.1.7(rw,sync,no_subtree_check,no_root_squash,mp,fsid=101) 192.168.1.34(rw,sync,no_subtree_check,no_root_squash,mp,fsid=101)' >> /etc/exports
 exportfs -ra
 ```
 
@@ -97,12 +97,12 @@ Machine configs are generated from the encrypted secrets bundle and never commit
 sops -d talos/talsecret.sops.yaml > /tmp/talsecret.yaml
 talosctl gen config talos-proxmox-cluster https://192.168.1.34:6443 \
   --with-secrets /tmp/talsecret.yaml --output talos/generated \
-  --install-image factory.talos.dev/metal-installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba:v1.14.0
+  --install-image factory.talos.dev/metal-installer/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515:v1.14.0
 rm /tmp/talsecret.yaml
 
 export TALOSCONFIG=talos/generated/talosconfig
 talosctl apply-config --insecure -n 192.168.1.34 -f talos/generated/controlplane.yaml
-talosctl apply-config --insecure -n 192.168.1.21 -f talos/generated/worker.yaml
+talosctl apply-config --insecure -n 192.168.1.7 -f talos/generated/worker.yaml
 talosctl bootstrap -n 192.168.1.34 -e 192.168.1.34
 talosctl kubeconfig -n 192.168.1.34 -e 192.168.1.34
 ```

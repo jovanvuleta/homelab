@@ -1,0 +1,25 @@
+# Scrape the exporter for pve1 (cluster + node collectors). instance=pve1 so
+# the Grafana dashboard (ID 10347) can select it.
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pve-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pve-exporter
+  endpoints:
+    - port: http
+      path: /pve
+      interval: 30s
+      scrapeTimeout: 20s
+      params:
+        target: ["192.168.1.50"] # pve1 on the LAN
+        module: ["default"]
+        cluster: ["1"]
+        node: ["1"]
+      relabelings:
+        - targetLabel: instance
+          replacement: pve1

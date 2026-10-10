@@ -79,6 +79,16 @@ exportfs -ra
 
 `mp` exports only while the drive is mounted, so an unplugged drive never lets uploads fill the host disk.
 
+Read-only API user for the Prometheus exporter (put the token value into `infrastructure/pve-exporter/token.sops.yaml`):
+
+```bash
+pveum user add prometheus@pve --comment "Prometheus exporter (read-only)"
+pveum aclmod / -user prometheus@pve -role PVEAuditor
+pveum user token add prometheus@pve exporter --privsep 0
+```
+
+Login uses a Google OpenID Connect realm (`google`, default on the login page); `root@pam` stays as the break-glass login.
+
 ### 2. VMs
 
 OpenTofu needs a Proxmox API token (`terraform@pve!tofu`, roles `PVEVMAdmin` on `/vms`, `PVEDatastoreUser` on `/storage`, `PVEAuditor` on `/`).

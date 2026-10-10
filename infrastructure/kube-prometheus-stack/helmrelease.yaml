@@ -176,3 +176,9 @@ spec:
             datasource:
               - name: DS_PROMETHEUS
                 value: Prometheus
+          proxmox:
+            gnetId: 10347 # Proxmox via Prometheus (pve-exporter)
+            revision: 5
+            datasource:
+              - name: DS_PROMETHEUS
+                value: Prometheus

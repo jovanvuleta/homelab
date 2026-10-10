@@ -1,0 +1,57 @@
+# Proxmox exporter: reads pve1's API (read-only token prometheus@pve!exporter)
+# and exposes CPU, memory, disk and network of the host and every VM.
+# Prometheus asks it about pve1 via servicemonitor.yaml.
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pve-exporter
+  namespace: monitoring
+spec:
+  interval: 1h
+  releaseName: pve-exporter
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  values:
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534 # image's USER is a name, kubelet needs a number
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+
+    controllers:
+      pve-exporter:
+        containers:
+          app:
+            image:
+              repository: prompve/prometheus-pve-exporter
+              tag: 3.10.1
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 48Mi
+              limits:
+                memory: 128Mi
+
+    service:
+      app:
+        controller: pve-exporter
+        ports:
+          http:
+            port: 9221
+
+    persistence:
+      config:
+        type: secret
+        name: pve-exporter # token.sops.yaml
+        globalMounts:
+          - path: /etc/prometheus
+            readOnly: true

@@ -1,0 +1,127 @@
+# Vaultwarden: Bitwarden-compatible password manager, tailnet only.
+# Data (SQLite, attachments, keys) on a local volume; a nightly job copies a
+# consistent backup to pve1's USB drive, which the restic job sends to B2.
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: vaultwarden
+  namespace: vaultwarden
+spec:
+  interval: 1h
+  releaseName: vaultwarden
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  values:
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+    controllers:
+      vaultwarden:
+        strategy: Recreate # single SQLite writer
+        containers:
+          app:
+            image:
+              repository: vaultwarden/server
+              tag: 1.37.4-alpine
+            env:
+              DOMAIN: https://vault.antelope-armadillo.ts.net
+              ROCKET_PORT: "8080" # unprivileged port, runs as non-root
+              # Open only to create the first account; then set to "false".
+              SIGNUPS_ALLOWED: "true"
+              INVITATIONS_ALLOWED: "false"
+              SHOW_PASSWORD_HINT: "false"
+              # No ADMIN_TOKEN: the /admin page stays disabled.
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+
+      backup:
+        type: cronjob
+        cronjob:
+          schedule: "30 4 * * *" # before the 05:00 restic job to B2
+          timeZone: Europe/Belgrade
+          concurrencyPolicy: Forbid
+          successfulJobsHistory: 3
+          failedJobsHistory: 3
+        containers:
+          app:
+            image:
+              repository: vaultwarden/server
+              tag: 1.37.4-alpine
+            command: ["/bin/sh", "-c"]
+            # ponytail: overwrites one copy each night; restic keeps the history in B2.
+            args:
+              - |
+                set -eu
+                /vaultwarden backup   # VACUUM INTO /data/db_<timestamp>.sqlite3
+                # Oldest first, so the newest ends up as db.sqlite3; also clears
+                # leftovers from a run that failed before this step.
+                for f in /data/db_*.sqlite3; do mv "$f" /backup/db.sqlite3; done
+                cp -a /data/rsa_key* /backup/
+                for x in attachments sends config.json; do [ -e "/data/$x" ] && cp -a "/data/$x" /backup/; done
+                ls -la /backup
+            env:
+              DATA_FOLDER: /data
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+
+    service:
+      app:
+        controller: vaultwarden
+        ports:
+          http:
+            port: 8080
+
+    ingress:
+      app:
+        className: tailscale
+        hosts:
+          - host: "" # tailscale drops rules that carry a host
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - vault # MagicDNS name: vault.<tailnet>.ts.net
+
+    persistence:
+      data:
+        # No subPath on local-path volumes (see README).
+        type: persistentVolumeClaim
+        storageClass: local-path
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        globalMounts:
+          - path: /data
+      backup:
+        type: nfs
+        server: 192.168.1.50 # pve1
+        path: /mnt/data/vaultwarden-backups
+        advancedMounts:
+          backup:
+            app:
+              - path: /backup
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

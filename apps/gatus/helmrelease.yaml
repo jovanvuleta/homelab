@@ -74,6 +74,12 @@ spec:
           interval: 5m
           conditions: ["[STATUS] == 200"]
           alerts: [{ type: telegram }]
+        - name: Vaultwarden
+          group: apps
+          url: http://vaultwarden.vaultwarden.svc.cluster.local:8080/alive
+          interval: 2m
+          conditions: ["[STATUS] == 200"]
+          alerts: [{ type: telegram }]
         - name: Homepage
           group: apps
           url: http://homepage.homepage.svc.cluster.local:3000

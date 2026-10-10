@@ -109,6 +109,11 @@ spec:
                     icon: copyparty.png
                     description: Shared files (web, upload from any device)
                     siteMonitor: http://copyparty.copyparty.svc.cluster.local:3923
+                - Vaultwarden:
+                    href: https://vault.antelope-armadillo.ts.net
+                    icon: vaultwarden.png
+                    description: Password manager (Bitwarden apps)
+                    siteMonitor: http://vaultwarden.vaultwarden.svc.cluster.local:8080/alive
             - Monitoring:
                 - Grafana:
                     href: https://grafana.antelope-armadillo.ts.net

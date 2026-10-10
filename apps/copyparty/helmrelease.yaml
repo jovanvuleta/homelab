@@ -73,7 +73,7 @@ spec:
 
     persistence:
       shared:
-        existingClaim: copyparty-shared # shared-pvc.yaml: /mnt/immich-data/shared on pve1
+        existingClaim: copyparty-shared # shared-pvc.yaml: /mnt/data/shared on pve1
         globalMounts:
           - path: /w
       state:

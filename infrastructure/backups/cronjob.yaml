@@ -2,6 +2,7 @@
 # versioned). Covers the small, irreplaceable data that fits B2's free 10 GB:
 #   - Immich database dumps (written daily by Immich into its backups/ folder)
 #   - Home Assistant backups (Home Assistant writes them to a share on pve1)
+#   - Vaultwarden backups (its own nightly job writes them to pve1 at 04:30)
 # Both are mounted read-only from pve1's USB drive over NFS.
 ---
 apiVersion: batch/v1
@@ -67,6 +68,9 @@ spec:
                 - name: home-assistant
                   mountPath: /backup/home-assistant
                   readOnly: true
+                - name: vaultwarden
+                  mountPath: /backup/vaultwarden
+                  readOnly: true
                 - name: cache
                   mountPath: /cache
                 - name: tmp
@@ -75,12 +79,17 @@ spec:
             - name: immich-db-dumps
               nfs:
                 server: 192.168.1.50 # pve1
-                path: /mnt/immich-data/immich/backups
+                path: /mnt/data/immich/backups
                 readOnly: true
             - name: home-assistant
               nfs:
                 server: 192.168.1.50
-                path: /mnt/immich-data/ha-backups
+                path: /mnt/data/ha-backups
+                readOnly: true
+            - name: vaultwarden
+              nfs:
+                server: 192.168.1.50
+                path: /mnt/data/vaultwarden-backups
                 readOnly: true
             - name: cache
               persistentVolumeClaim:

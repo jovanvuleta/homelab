@@ -24,10 +24,11 @@ Everything the cluster runs is declared in this repository. Secrets are committe
 - **[Home Assistant](https://www.home-assistant.io/)**: home automation, running as its own VM on Proxmox.
 - **[AdGuard Home](https://adguard.com/adguard-home/overview.html)**: DNS-level ad and tracker blocking for every device on the tailnet.
 - **[Copyparty](https://github.com/9001/copyparty)**: web file server for a shared folder on the USB drive; upload and download from any tailnet device's browser, no login.
+- **[Vaultwarden](https://github.com/dani-garcia/vaultwarden)**: Bitwarden-compatible password manager, tailnet only.
 - **[Homepage](https://gethomepage.dev/)**: start page linking everything, with live status.
 
 **Backups**
-- Nightly **restic** backups to **Backblaze B2** (encrypted, versioned) of the Immich database dumps and Home Assistant's backups. Home Assistant writes its backups to a share on `pve1`.
+- Nightly **restic** backups to **Backblaze B2** (encrypted, versioned) of the Immich database dumps, Home Assistant's backups and Vaultwarden's data. Home Assistant writes its backups to a share on `pve1`.
 
 **Planned**
 - Off-site backup of the photo library itself.
@@ -65,17 +66,27 @@ Everything inside the cluster comes back from Git. These are the few one-time st
 
 ### 1. Proxmox host (`pve1`)
 
-The Immich photo library lives on an external USB drive (ext4, label `immich-data`) shared to the cluster over NFS.
+Bulk data (Immich library, backups, shared files) lives on an external USB drive (ext4, label `data`) mounted at `/mnt/data` and shared to the cluster over NFS.
 
 ```bash
-mkdir -p /mnt/immich-data/immich
-echo 'LABEL=immich-data /mnt/immich-data ext4 defaults,nofail,x-systemd.device-timeout=10s 0 2' >> /etc/fstab
+mkdir -p /mnt/data
+echo 'LABEL=data /mnt/data ext4 defaults,nofail,x-systemd.device-timeout=90s 0 2' >> /etc/fstab
 mount -a
+mkdir -p /mnt/data/immich /mnt/data/shared /mnt/data/vaultwarden-backups /mnt/data/ha-backups
 
 apt install -y nfs-kernel-server
-echo '/mnt/immich-data 192.168.1.7(rw,sync,no_subtree_check,no_root_squash,mp,fsid=101) 192.168.1.34(rw,sync,no_subtree_check,no_root_squash,mp,fsid=101)' >> /etc/exports
-exportfs -ra
+cat >> /etc/exports <<'EOF'
+/mnt/data 192.168.1.7(rw,sync,no_subtree_check,no_root_squash,mp,fsid=101) 192.168.1.34(rw,sync,no_subtree_check,no_root_squash,mp,fsid=101)
+/mnt/data/ha-backups 192.168.1.40(rw,sync,no_subtree_check,root_squash,mp=/mnt/data) 192.168.1.7(ro,sync,no_subtree_check,mp=/mnt/data) 192.168.1.34(ro,sync,no_subtree_check,mp=/mnt/data)
+EOF
+
+# Start NFS only after the drive is mounted (it's slow to appear after a power cut)
+mkdir -p /etc/systemd/system/nfs-server.service.d
+printf '[Unit]\nRequiresMountsFor=/mnt/data\n' > /etc/systemd/system/nfs-server.service.d/wait-for-usb.conf
+systemctl daemon-reload && systemctl restart nfs-server && exportfs -v
 ```
+
+Ownership inside the drive: `shared/` 1000:1000 (Copyparty), `vaultwarden-backups/` 1000:65534 mode 750, `ha-backups/` 65534:65534. The router has DHCP reservations for `pve1` (.50), the Talos nodes (.34, .7) and Home Assistant (.40); the exports depend on them.
 
 `mp` exports only while the drive is mounted, so an unplugged drive never lets uploads fill the host disk.
 

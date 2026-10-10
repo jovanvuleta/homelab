@@ -17,7 +17,7 @@ spec:
     name: copyparty-shared
   nfs:
     server: 192.168.1.50 # pve1
-    path: /mnt/immich-data/shared
+    path: /mnt/data/shared
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

@@ -5,3 +5,6 @@ resources:
   - b2.sops.yaml
   - restic-cache.yaml
   - cronjob.yaml
+  - ocirepository.yaml
+  - backrest-seed.yaml
+  - backrest.yaml

@@ -29,6 +29,7 @@ Everything the cluster runs is declared in this repository. Secrets are committe
 
 **Backups**
 - Nightly **restic** backups to **Backblaze B2** (encrypted, versioned) of the Immich database dumps, Home Assistant's backups and Vaultwarden's data. Home Assistant writes its backups to a share on `pve1`.
+- **[Backrest](https://github.com/garethgeorge/backrest)**: web UI to browse the B2 snapshots and restore or download files. Browse/restore only; the nightly job does the backups and pruning.
 
 **Planned**
 - Off-site backup of the photo library itself.

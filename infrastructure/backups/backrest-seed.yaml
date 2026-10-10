@@ -1,0 +1,27 @@
+# Backrest's starting config, copied in only if none exists yet (Backrest then
+# owns the file: UI changes and the login it asks for on first visit live on
+# its volume). No secrets: restic gets B2 credentials and the password from the
+# restic-b2 secret via environment variables; the URI is expanded from them.
+# guid is the restic repository's id (`restic cat config`).
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backrest-seed
+  namespace: backups
+data:
+  config.json: |
+    {
+      "modno": 1,
+      "version": 4,
+      "instance": "homelab",
+      "repos": [
+        {
+          "id": "b2",
+          "uri": "${RESTIC_REPOSITORY}",
+          "guid": "51cb0e6acf8226686f4ebb4e837244d9730c7f0991879330870403a9d43c0afa",
+          "prunePolicy": { "schedule": { "disabled": true } },
+          "checkPolicy": { "schedule": { "disabled": true } }
+        }
+      ]
+    }

@@ -80,6 +80,12 @@ spec:
           interval: 2m
           conditions: ["[STATUS] == 200"]
           alerts: [{ type: telegram }]
+        - name: Backrest
+          group: backups
+          url: http://backrest.backups.svc.cluster.local:9898
+          interval: 5m
+          conditions: ["[STATUS] == 200"]
+          alerts: [{ type: telegram }]
         - name: Homepage
           group: apps
           url: http://homepage.homepage.svc.cluster.local:3000

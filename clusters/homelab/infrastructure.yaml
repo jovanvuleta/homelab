@@ -129,6 +129,7 @@ spec:
   wait: true
   dependsOn:
     - name: local-path-provisioner
+    - name: tailscale-operator # Backrest's tailnet address
   sourceRef:
     kind: GitRepository
     name: flux-system

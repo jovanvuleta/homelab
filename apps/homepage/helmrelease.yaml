@@ -114,6 +114,11 @@ spec:
                     icon: vaultwarden.png
                     description: Password manager (Bitwarden apps)
                     siteMonitor: http://vaultwarden.vaultwarden.svc.cluster.local:8080/alive
+                - Backrest:
+                    href: https://backrest.antelope-armadillo.ts.net
+                    icon: backrest.png
+                    description: Browse and restore B2 backups
+                    siteMonitor: http://backrest.backups.svc.cluster.local:9898
             - Monitoring:
                 - Grafana:
                     href: https://grafana.antelope-armadillo.ts.net

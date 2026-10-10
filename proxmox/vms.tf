@@ -26,7 +26,7 @@ resource "proxmox_virtual_environment_vm" "homeassistant" {
   }
 
   memory {
-    dedicated = 8192
+    dedicated = 4096 # uses ~1.8 GB; HA OS needs 2 GB minimum
   }
 
   efi_disk {

@@ -55,3 +55,7 @@ spec:
         globalMounts:
           - path: /etc/prometheus
             readOnly: true
+      tmp:
+        type: emptyDir # gunicorn's worker files; root filesystem stays read-only
+        globalMounts:
+          - path: /tmp

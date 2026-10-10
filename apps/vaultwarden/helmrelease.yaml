@@ -33,8 +33,9 @@ spec:
             env:
               DOMAIN: https://vault.antelope-armadillo.ts.net
               ROCKET_PORT: "8080" # unprivileged port, runs as non-root
-              # Open only to create the first account; then set to "false".
-              SIGNUPS_ALLOWED: "true"
+              # Closed after the owner's account was created. To add a user,
+              # set "true" temporarily, sign up, then set it back.
+              SIGNUPS_ALLOWED: "false"
               INVITATIONS_ALLOWED: "false"
               SHOW_PASSWORD_HINT: "false"
               # No ADMIN_TOKEN: the /admin page stays disabled.

@@ -1,0 +1,125 @@
+# Restore drill: brings Vaultwarden's latest B2 snapshot up in a throwaway pod
+# (RAM only) at https://vault-restore-test.<tailnet>.ts.net, to prove the
+# backups restore. Not listed in ../kustomization.yaml, so Flux never applies it.
+#
+#   kubectl apply  -f infrastructure/backups/restore-test/vaultwarden.yaml
+#   # log in with your master password, check entries, change nothing
+#   kubectl delete -f infrastructure/backups/restore-test/vaultwarden.yaml
+#
+# Runs in the backups namespace because the restic-b2 secret lives there.
+# HTTPS is required: Bitwarden clients refuse plain HTTP, even on localhost.
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: vaultwarden-restore-test
+  namespace: backups
+  labels:
+    app: vaultwarden-restore-test
+spec:
+  restartPolicy: Never
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000 # same user for restore and Vaultwarden, so SQLite can write
+    runAsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  initContainers:
+    - name: restore-from-b2
+      image: restic/restic:0.19.1
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          set -eu
+          restic restore latest --include /backup/vaultwarden --target /tmp/r
+          cp -a /tmp/r/backup/vaultwarden/. /data/
+          ls -la /data
+      envFrom:
+        - secretRef:
+            name: restic-b2
+      env:
+        - name: RESTIC_CACHE_DIR
+          value: /tmp/cache
+        - name: HOME
+          value: /tmp
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]
+      volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: tmp
+          mountPath: /tmp
+  containers:
+    - name: vaultwarden
+      image: vaultwarden/server:1.37.4-alpine # keep in step with apps/vaultwarden
+      env:
+        - name: DOMAIN
+          value: https://vault-restore-test.antelope-armadillo.ts.net
+        - name: ROCKET_PORT
+          value: "8080"
+        - name: SIGNUPS_ALLOWED
+          value: "false"
+        - name: DATA_FOLDER
+          value: /data
+      ports:
+        - name: http
+          containerPort: 8080
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]
+      resources:
+        limits:
+          memory: 256Mi
+      volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: tmp
+          mountPath: /tmp
+  volumes:
+    - name: data
+      emptyDir:
+        medium: Memory # never written to disk; gone with the pod
+        sizeLimit: 256Mi
+    - name: tmp
+      emptyDir:
+        medium: Memory
+        sizeLimit: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vaultwarden-restore-test
+  namespace: backups
+spec:
+  selector:
+    app: vaultwarden-restore-test
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vaultwarden-restore-test
+  namespace: backups
+spec:
+  ingressClassName: tailscale
+  rules:
+    - http: # no host: the Tailscale operator ignores rules that carry one
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: vaultwarden-restore-test
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - vault-restore-test # MagicDNS name: vault-restore-test.<tailnet>.ts.net

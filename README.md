@@ -58,6 +58,20 @@ talos/            Talos cluster secrets (SOPS-encrypted)
 
 Secrets are encrypted with SOPS before they are committed; recipients are configured in `.sops.yaml`. No plaintext credential is ever stored in this repository.
 
+## Restoring from backup
+
+Nightly restic snapshots in B2 hold the Immich database dumps, Home Assistant's backups and Vaultwarden's data (`/backup/immich-db`, `/backup/home-assistant`, `/backup/vaultwarden`). Restoring needs the restic password (`infrastructure/backups/b2.sops.yaml`) and the B2 key, so keep both outside the homelab too.
+
+**Restore drill for Vaultwarden** (tested 2026-10-10): brings the latest snapshot up in a throwaway, RAM-only pod with its own tailnet address. Log in with your master password, check the entries, change nothing, then delete it.
+
+```bash
+kubectl apply  -f infrastructure/backups/restore-test/vaultwarden.yaml
+# https://vault-restore-test.<tailnet>.ts.net
+kubectl delete -f infrastructure/backups/restore-test/vaultwarden.yaml
+```
+
+A real restore uses the same files: copy `db.sqlite3`, `rsa_key*` and any `attachments/` / `sends/` from the snapshot into Vaultwarden's volume while the app is scaled to zero, then start it again.
+
 ## Rebuilding from scratch
 
 Everything inside the cluster comes back from Git. These are the few one-time steps outside it.

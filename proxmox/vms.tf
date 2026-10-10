@@ -95,8 +95,9 @@ resource "proxmox_virtual_environment_vm" "talos" {
 
   agent {
     enabled = true
-    # Talos image lacks the qemu-guest-agent extension until the next upgrade;
-    # cap the wait so plans don't stall on the missing agent.
+    # Agent comes from the siderolabs/qemu-guest-agent extension in the Talos
+    # image (schematic ce4c9805…, see README). Short timeout so a plan doesn't
+    # stall if a node is mid-reboot.
     timeout = "15s"
   }
 

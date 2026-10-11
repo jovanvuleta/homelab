@@ -20,5 +20,3 @@ spec:
   values:
     apiServerProxyConfig:
       mode: "true" # ours: default "false", enabled so Ingress resources with ingressClassName tailscale get proxied
-    proxyConfig:
-      defaultProxyClass: direct # ours: default "", every Ingress/Service proxy gets static LAN endpoints (proxyclass.yaml)

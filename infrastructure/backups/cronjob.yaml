@@ -42,6 +42,10 @@ spec:
                   restic backup /backup --host homelab --tag nightly
                   restic forget --host homelab --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune
                   restic check
+                  # Fail (and fire KubeJobFailed) well before B2's free 10 GB is reached
+                  size=$(restic stats --mode raw-data --json | sed -n 's/.*"total_size":\([0-9]*\).*/\1/p')
+                  echo "repository size: $((size / 1000000)) MB"
+                  [ "$size" -lt 8000000000 ] || { echo "over the 8 GB alarm, tighten retention"; exit 1; }
               envFrom:
                 - secretRef:
                     name: restic-b2 # B2 key, repository URL, restic password

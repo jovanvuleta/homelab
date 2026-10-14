@@ -59,6 +59,18 @@ spec:
     valkey:
       enabled: true # ours: default false, we use the chart's bundled Valkey (Redis fork) instead of an external one
     server:
+      controllers:
+        main:
+          containers:
+            main:
+              probes:
+                liveness:
+                  spec:
+                    timeoutSeconds: 10
+                    failureThreshold: 6 # restart only after ~1 min unresponsive
+                readiness:
+                  spec:
+                    timeoutSeconds: 5
       ingress:
         main:
           enabled: true # ours: default false, exposed via the Tailscale ingress class

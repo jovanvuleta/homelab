@@ -40,8 +40,23 @@ spec:
       compactor:
         retention_enabled: true
         delete_request_store: filesystem
+      # Evaluates the log-based alerts in alert-rules.yaml.
+      rulerConfig:
+        alertmanager_url: http://kube-prometheus-stack-alertmanager.monitoring.svc:9093
+        rule_path: /var/loki/ruler-tmp # scratch copy of the rules, on the volume
+        storage:
+          type: local
+          local:
+            directory: /etc/loki/rules
     singleBinary:
       replicas: 1
+      extraVolumes:
+        - name: alert-rules
+          configMap:
+            name: loki-alert-rules
+      extraVolumeMounts:
+        - name: alert-rules
+          mountPath: /etc/loki/rules/fake # tenant "fake": auth is disabled
       persistence:
         enabled: true
         storageClass: local-path

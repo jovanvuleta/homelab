@@ -1,0 +1,27 @@
+# Log-based alerts, evaluated by Loki's ruler and sent to Alertmanager (and
+# from there to Telegram). Metric-based alerts stay Prometheus rules; this is
+# for conditions that only show up as log lines. Mounted into Loki under the
+# single tenant's directory ("fake" when auth is disabled), see loki.yaml.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-alert-rules
+  namespace: monitoring
+data:
+  claude-agent.yaml: |
+    groups:
+      - name: claude-agent
+        rules:
+          # The claude.ai login can't be renewed from here: someone has to
+          # sign in again. Also fires right after the first deploy, before
+          # the initial login, which proves the alert path works.
+          - alert: ClaudeAgentLoginExpired
+            expr: |
+              sum(count_over_time({namespace="claude-agent"} |~ `(?i)login expired|run /login|not logged in yet|full-scope login token` [15m])) > 0
+            labels:
+              severity: warning
+              namespace: claude-agent
+            annotations:
+              summary: The Claude Code agent is logged out.
+              description: "Sign in again: kubectl -n claude-agent exec -it deploy/claude-agent -- claude auth login"

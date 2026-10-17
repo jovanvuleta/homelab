@@ -109,3 +109,19 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: claude-agent
+  namespace: flux-system
+spec:
+  interval: 1h
+  path: ./apps/claude-agent
+  prune: true
+  wait: true
+  dependsOn:
+    - name: local-path-provisioner
+  sourceRef:
+    kind: GitRepository
+    name: flux-system

@@ -1,0 +1,16 @@
+# Read-only cluster access for the agent: the built-in "view" role reads
+# almost everything (Flux objects included) but no Secrets, and changes nothing.
+# The ServiceAccount itself is created by the chart (helmrelease.yaml).
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: claude-agent-view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: claude-agent
+    namespace: claude-agent

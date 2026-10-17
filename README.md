@@ -26,6 +26,7 @@ Everything the cluster runs is declared in this repository. Secrets are committe
 - **[Copyparty](https://github.com/9001/copyparty)**: web file server for a shared folder on the USB drive; upload and download from any tailnet device's browser, no login.
 - **[Vaultwarden](https://github.com/dani-garcia/vaultwarden)**: Bitwarden-compatible password manager, tailnet only.
 - **[Homepage](https://gethomepage.dev/)**: start page linking everything, with live status.
+- **[Claude Code](https://code.claude.com/docs/en/remote-control) agent**: an always-on Claude Code session in the cluster, steered from the Claude app. Read-only cluster access; proposed changes come back as diffs.
 
 **Backups**
 - Nightly **restic** backups to **Backblaze B2** (encrypted, versioned) of the Immich database dumps, Home Assistant's backups and Vaultwarden's data. Home Assistant writes its backups to a share on `pve1`.

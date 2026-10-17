@@ -1,0 +1,128 @@
+# Claude Code agent: a long-running `claude remote-control` server, steered
+# from claude.ai/code or the Claude app. It runs here so it can see the
+# cluster; it connects out to Anthropic only, nothing is exposed.
+#
+# Read-only by design: the "view" role (rbac.yaml) reads the cluster but not
+# Secrets, and the repo is a plain HTTPS clone with no push credentials, so
+# changes come back as diffs to review and push from a laptop.
+#
+# One-time setup after the first deploy (the login token and answers are kept
+# on the volume):
+#   kubectl -n claude-agent exec -it deploy/claude-agent -- claude auth login
+#   kubectl -n claude-agent attach -it deploy/claude-agent
+#     answer the Remote Control and folder-trust prompts, detach with Ctrl-P Ctrl-Q
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: claude-agent
+  namespace: claude-agent
+spec:
+  interval: 1h
+  releaseName: claude-agent
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  values:
+    defaultPodOptions:
+      automountServiceAccountToken: true # kubectl/flux use it in-cluster
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+    controllers:
+      claude-agent:
+        strategy: Recreate # single volume, single writer
+        serviceAccount:
+          name: claude-agent
+        containers:
+          app:
+            image:
+              repository: node # Claude Code runs on Node; the full image brings git and curl
+              tag: 24.22.0-trixie
+            tty: true # Remote Control's first-run prompts need a terminal
+            stdin: true
+            env:
+              HOME: /home/claude
+              PATH: /home/claude/.local/bin:/usr/local/bin:/usr/bin:/bin
+              DISABLE_AUTOUPDATER: "1" # versions are pinned below, Renovate bumps them
+              # renovate: datasource=npm depName=@anthropic-ai/claude-code
+              CLAUDE_CODE_VERSION: 2.1.292
+              # renovate: datasource=github-releases depName=kubernetes/kubernetes
+              KUBECTL_VERSION: v1.37.1
+              # renovate: datasource=github-releases depName=fluxcd/flux2
+              FLUX_VERSION: v2.9.6
+            command: ["/bin/sh", "-c"]
+            # Tools are installed on the volume, one directory per version, so a
+            # restart reuses them and a version bump downloads once.
+            args:
+              - |
+                set -eu
+                bin=$HOME/.local/bin
+                tools=$HOME/.local/tools
+                mkdir -p "$bin" "$tools"
+
+                c=$tools/claude-$CLAUDE_CODE_VERSION
+                [ -x "$c/bin/claude" ] || npm install -g --prefix "$c" "@anthropic-ai/claude-code@$CLAUDE_CODE_VERSION"
+                ln -sfn "$c/bin/claude" "$bin/claude"
+
+                k=$tools/kubectl-$KUBECTL_VERSION
+                if [ ! -x "$k" ]; then
+                  url=https://dl.k8s.io/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl
+                  curl -fsSLo /tmp/kubectl "$url"
+                  echo "$(curl -fsSL "$url.sha256")  /tmp/kubectl" | sha256sum -c
+                  install -m 0755 /tmp/kubectl "$k"
+                fi
+                ln -sfn "$k" "$bin/kubectl"
+
+                f=$tools/flux-$FLUX_VERSION
+                if [ ! -x "$f" ]; then
+                  v=${FLUX_VERSION#v}
+                  url=https://github.com/fluxcd/flux2/releases/download/$FLUX_VERSION
+                  cd /tmp
+                  curl -fsSLO "$url/flux_${v}_linux_amd64.tar.gz"
+                  curl -fsSL "$url/flux_${v}_checksums.txt" | grep " flux_${v}_linux_amd64.tar.gz\$" | sha256sum -c
+                  tar -xzf "flux_${v}_linux_amd64.tar.gz" flux
+                  install -m 0755 flux "$f"
+                fi
+                ln -sfn "$f" "$bin/flux"
+
+                [ -d "$HOME/homelab/.git" ] || git clone https://github.com/jovanvuleta/homelab.git "$HOME/homelab"
+                git -C "$HOME/homelab" pull --ff-only || true
+                cd "$HOME/homelab"
+
+                until claude auth status | grep -q '"loggedIn": true'; do
+                  echo "Not logged in yet: see the setup steps in apps/claude-agent/helmrelease.yaml"
+                  sleep 60
+                done
+                # default mode: every command and web request waits for approval
+                # in the app, so text in logs or files can't make it act alone.
+                exec claude remote-control --name homelab --capacity 4 --permission-mode default
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 50m
+                memory: 512Mi
+              limits:
+                memory: 4Gi # a few concurrent sessions
+
+    persistence:
+      home:
+        # No subPath on local-path volumes (see README).
+        type: persistentVolumeClaim
+        storageClass: local-path
+        accessMode: ReadWriteOnce
+        size: 10Gi
+        globalMounts:
+          - path: /home/claude
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

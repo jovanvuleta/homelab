@@ -35,8 +35,16 @@
         "/(^|/)helmrelease\\.ya?ml$/"
       ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+tag: (?<currentValue>\\S+)"
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+tag: (?<currentValue>\\S+)",
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+[A-Z_]+_VERSION: (?<currentValue>\\S+)"
       ]
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Claude Code publishes daily to `latest`; follow the `stable` channel",
+      "matchPackageNames": ["@anthropic-ai/claude-code"],
+      "followTag": "stable"
     }
   ]
 }

@@ -18,7 +18,7 @@ spec:
           app:
             image:
               repository: ghcr.io/gethomepage/homepage
-              tag: v2.4.0
+              tag: v2.7.0
             env:
               HOMEPAGE_ALLOWED_HOSTS: homepage.antelope-armadillo.ts.net,homepage.homepage.svc.cluster.local:3000 # Tailscale URL + in-cluster name Gatus checks
               LOG_TARGETS: stdout

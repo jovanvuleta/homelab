@@ -27,7 +27,7 @@ spec:
             # chart's appVersion catches up.
             image:
               # renovate: datasource=github-releases depName=immich-app/immich
-              tag: v3.3.3
+              tag: v3.3.5
             env:
               # ours: point at the CloudNativePG cluster's auto-generated app secret
               DB_HOSTNAME:

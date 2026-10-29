@@ -42,7 +42,7 @@ spec:
           app:
             image:
               repository: node # Claude Code runs on Node; the full image brings git and curl
-              tag: 24.22.0-trixie
+              tag: 24.22.2-trixie
             tty: true # Remote Control's first-run prompts need a terminal
             stdin: true
             env:

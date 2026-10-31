@@ -54,7 +54,7 @@ spec:
               # renovate: datasource=github-releases depName=kubernetes/kubernetes
               KUBECTL_VERSION: v1.37.1
               # renovate: datasource=github-releases depName=fluxcd/flux2
-              FLUX_VERSION: v2.9.6
+              FLUX_VERSION: v2.10.0
             command: ["/bin/sh", "-c"]
             # Tools are installed on the volume, one directory per version, so a
             # restart reuses them and a version bump downloads once.

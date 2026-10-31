@@ -50,7 +50,7 @@ spec:
               PATH: /home/claude/.local/bin:/usr/local/bin:/usr/bin:/bin
               DISABLE_AUTOUPDATER: "1" # versions are pinned below, Renovate bumps them
               # renovate: datasource=npm depName=@anthropic-ai/claude-code
-              CLAUDE_CODE_VERSION: 2.1.292
+              CLAUDE_CODE_VERSION: 2.1.309
               # renovate: datasource=github-releases depName=kubernetes/kubernetes
               KUBECTL_VERSION: v1.37.1
               # renovate: datasource=github-releases depName=fluxcd/flux2
